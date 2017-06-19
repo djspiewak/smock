@@ -37,6 +37,7 @@ package object smock {
                     gi.map(s.k)
 
                   case None =>
+                    // TODO line numbers
                     GC.fail(FailureException(failure(s"unexpected suspension: ${s.fi}")))
                 }
 

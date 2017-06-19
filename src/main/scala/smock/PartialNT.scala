@@ -22,7 +22,7 @@ trait PartialNT[F[_], G[_]] {
 
 object PartialNT {
 
-  implicit def skolemize[F[_], G[_]](pf: PartialFunction[F[τ], G[τ]]): PartialNT[F, G] =
+  def skolemize[F[_], G[_]](pf: PartialFunction[F[τ], G[τ]]): PartialNT[F, G] =
     new PartialNT[F, G] {
 
       def apply[α](fa: F[α]): Option[G[α]] = {

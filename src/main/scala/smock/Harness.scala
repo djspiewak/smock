@@ -25,7 +25,7 @@ object Harness {
     new PartialHarness[F, G]
 
   def pattern[F[_], G[_]](pf: PartialFunction[F[τ], G[τ]]): Harness[F, G, Unit] =
-    Free.liftF(Pattern(pf))
+    Free.liftF(Pattern(PartialNT.skolemize(pf)))
 
   final class PartialHarness[F[_], G[_]] private[Harness] () {
 
