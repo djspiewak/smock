@@ -1,4 +1,4 @@
-# smock
+# smock [![Build Status](https://travis-ci.org/djspiewak/smock.svg?branch=master)](https://travis-ci.org/djspiewak/smock)
 
 A relatively-trivial library for testing `Free` programs, inspired by [purescript-mockfree](https://github.com/slamdata/purescript-mockfree) and the testing internals within [Nelson](https://github.com/Verizon/nelson/tree/master/core/src/test/scala/test).
 
