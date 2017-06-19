@@ -26,7 +26,7 @@ package object smock {
     import StandardResults._
 
     // an asserted foldMap
-    def interpret[B](target: Free[F, B])(implicit GM: Monad[G], GC: Catchable[G]): G[B] = {
+    def apply[B](target: Free[F, B])(implicit GM: Monad[G], GC: Catchable[G]): G[B] = {
       def inner(self: Free[Coyoneda[HarnessOp[F, G, ?], ?], A], target: Free[Coyoneda[F, ?], B]): G[B] = {
         (self.resume, target.resume) match {
           case (-\/(h), -\/(s)) =>
