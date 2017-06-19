@@ -16,6 +16,9 @@
 
 package smock
 
+/**
+ * Equivalent to F ~> λ[α => Option[G[α]]]
+ */
 trait PartialNT[F[_], G[_]] {
   def apply[α](fa: F[α]): Option[G[α]]
 }
