@@ -63,7 +63,7 @@ headers := Map(
   "scala" -> Apache2_0("2017", "Daniel Spiewak"),
   "java" -> Apache2_0("2017", "Daniel Spiewak"))
 
-// bintrayVcsUrl := Some("...")
+bintrayVcsUrl := Some("https://github.com/djspiewak/smock")
 
 /***********************************************************************\
                       Boilerplate below these lines
