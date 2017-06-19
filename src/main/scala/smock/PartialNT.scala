@@ -25,11 +25,12 @@ trait PartialNT[F[_], G[_]] {
 
 object PartialNT {
 
-  def skolemize[F[_], G[_]](pf: PartialFunction[F[τ], G[τ]]): PartialNT[F, G] =
+  def broaden[F[_], G[_], A](pf: PartialFunction[F[A], G[A]]): PartialNT[F, G] =
     new PartialNT[F, G] {
 
       def apply[α](fa: F[α]): Option[G[α]] = {
-        val applied = τ.skolemize[λ[α => PartialFunction[F[α], G[α]]]](pf)[α]
+        // erasure + runtime checks in isDefinedAt allow this unsound expansion
+        val applied = pf.asInstanceOf[PartialFunction[F[α], G[α]]]
 
         if (applied.isDefinedAt(fa))
           Some(applied(fa))

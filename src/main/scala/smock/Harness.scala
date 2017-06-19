@@ -24,21 +24,21 @@ object Harness {
   def apply[F[_], G[_]]: PartialHarness[F, G] =
     new PartialHarness[F, G]
 
-  def pattern[F[_], G[_]](pf: PartialFunction[F[τ], G[τ]]): Harness[F, G, Unit] = {
+  def pattern[F[_], G[_], A](pf: PartialFunction[F[A], G[A]]): Harness[F, G, Unit] = {
     val e = new Exception
     val trace = e.getStackTrace.toList.drop(1)
 
-    Free.liftF(Pattern(PartialNT.skolemize(pf), trace))
+    Free.liftF(Pattern(PartialNT.broaden(pf), trace))
   }
 
   final class PartialHarness[F[_], G[_]] private[Harness] () {
 
     // copy/pasted to allow for proper stack computation
-    def pattern(pf: PartialFunction[F[τ], G[τ]]): Harness[F, G, Unit] = {
+    def pattern[A](pf: PartialFunction[F[A], G[A]]): Harness[F, G, Unit] = {
       val e = new Exception
       val trace = e.getStackTrace.toList.drop(1)
 
-      Free.liftF(Pattern(PartialNT.skolemize(pf), trace))
+      Free.liftF(Pattern(PartialNT.broaden(pf), trace))
     }
   }
 }
