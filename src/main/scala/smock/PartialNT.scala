@@ -14,4 +14,24 @@
  * limitations under the License.
  */
 
-package object smock
+package smock
+
+trait PartialNT[F[_], G[_]] {
+  def apply[α](fa: F[α]): Option[G[α]]
+}
+
+object PartialNT {
+
+  implicit def skolemize[F[_], G[_]](pf: PartialFunction[F[τ], G[τ]]): PartialNT[F, G] =
+    new PartialNT[F, G] {
+
+      def apply[α](fa: F[α]): Option[G[α]] = {
+        val applied = τ.skolemize[λ[α => PartialFunction[F[α], G[α]]]](pf)[α]
+
+        if (applied.isDefinedAt(fa))
+          Some(applied(fa))
+        else
+          None
+      }
+    }
+}
