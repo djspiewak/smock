@@ -22,13 +22,20 @@ sealed trait HarnessOp[F[_], G[_], A] extends Product with Serializable {
 
   // we need to go through this somewhat sideways encoding
   // mostly because scalac can't handle gadt type unification
-  def fold[B, R](k: A => B)(pattern: (Unit => B, PartialNT[F, G]) => R): R
+  def fold[B, R](
+      k: A => B)(
+      pattern: ∀[λ[β => (β => B, PartialNT[F, λ[α => G[(β, α)]]]) => R]]): R
 }
 
 object HarnessOp {
 
-  final case class Pattern[F[_], G[_]](pf: PartialNT[F, G], trace: StackTrace) extends HarnessOp[F, G, Unit] {
-    def fold[B, R](k: Unit => B)(pattern: (Unit => B, PartialNT[F, G]) => R): R =
-      pattern(k, pf)
+  final case class Pattern[F[_], G[_], S](
+      pf: PartialNT[F, λ[α => G[(S, α)]]],
+      trace: StackTrace) extends HarnessOp[F, G, S] {
+
+    def fold[B, R](
+        k: S => B)(
+        pattern: ∀[λ[β => (β => B, PartialNT[F, λ[α => G[(β, α)]]]) => R]]): R =
+      pattern[S](k, pf)
   }
 }

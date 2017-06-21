@@ -25,26 +25,48 @@ package object smock {
   final implicit class HarnessSyntax[F[_], G[_], A](val self: Harness[F, G, A]) extends AnyVal {
     import StandardResults._
 
+    private type FreeC[H[_], B] = Free[Coyoneda[H, ?], B]
+
     // an asserted foldMap
     def apply[B](target: Free[F, B])(implicit GM: Monad[G], GC: Catchable[G]): G[B] = {
-      def inner(self: Free[Coyoneda[HarnessOp[F, G, ?], ?], A], target: Free[Coyoneda[F, ?], B]): G[B] = {
+      type Self = FreeC[HarnessOp[F, G, ?], A]
+      type Target = FreeC[F, B]
+
+      def inner(self: Self, target: Target): G[B] = {
         (self.resume, target.resume) match {
           case (-\/(h), -\/(s)) =>
-            val (gs, self2) = h.fi.fold(h.k)(
-              pattern = { (k, pf) =>
-                val gs = pf(s.fi) match {
-                  case Some(gi) =>
-                    gi.map(s.k)
+            /*
+             * Ok, let's unpack the following…
+             *
+             * - The intermediate type (the first parameter of the fold) is the
+             *   coyoneda transformation.  Which is to say, given the existential
+             *   produced value, wrap it up and get back into Free for the next
+             *   iteration.
+             * - The return type (the second parameter of the fold) is the
+             *   pair of "next" `self` and `target` wrapped within G.
+             */
+            val stuffG = h.fi.fold(h.k)(
+              pattern = new ∀[λ[β => (β => Self, PartialNT[F, λ[α => G[(β, α)]]]) => G[(Self, Target)]]] {
+                def apply[β] = { (k, pf) =>
+                  // k: β => Self
+                  // pf: PartialNT[F, λ[α => G[(β, α)]]]
 
-                  case None =>
-                    val f = Failure(s"unexpected suspension: ${s.fi}", stackTrace = h.fi.trace)
-                    GC.fail(FailureException(f))
+                  pf(s.fi) match {
+                    case Some(gsi) => // gsi: G[(β, s.I)]
+                      gsi map {
+                        case (state, result) => (k(state), s.k(result))
+                      }
+
+                    case None =>
+                      val f = Failure(s"unexpected suspension: ${s.fi}", stackTrace = h.fi.trace)
+                      GC.fail(FailureException(f))
+                  }
                 }
-
-                (gs, k(()))
               })
 
-            gs.flatMap(fc => inner(self2, fc))
+            stuffG flatMap {
+              case (self2, fc) => inner(self2, fc)
+            }
 
           case (-\/(h), \/-(_)) =>
             val f = Failure("unexpected program termination", stackTrace = h.fi.trace)
