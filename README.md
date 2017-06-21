@@ -5,10 +5,12 @@ A relatively-trivial library for testing `Free` programs, inspired by [purescrip
 ## Usage
 
 ```sbt
-libraryDependencies += "com.codecommit" %% "smock" % "0.1" % "test"
+resolvers += "bintray-djspiewak-maven" at "https://dl.bintray.com/djspiewak/maven"
+
+libraryDependencies += "com.codecommit" %% "smock" % "0.2" % "test"
 ```
 
-Depends on **specs2-core 3.9.1**.  Cross-builds are available for Scala 2.12 and 2.11.
+Depends on **specs2-core 3.9.1** and **scalaz 7.2.13**.  Cross-builds are available for Scala 2.12 and 2.11.
 
 A quick example stolen from the current version of the spec:
 
