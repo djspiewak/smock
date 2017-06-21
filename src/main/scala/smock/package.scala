@@ -31,13 +31,13 @@ package object smock {
         (self.resume, target.resume) match {
           case (-\/(h), -\/(s)) =>
             val (gs, self2) = h.fi.fold(h.k)(
-              pattern = { (k, pf, trace) =>
+              pattern = { (k, pf) =>
                 val gs = pf(s.fi) match {
                   case Some(gi) =>
                     gi.map(s.k)
 
                   case None =>
-                    val f = Failure(s"unexpected suspension: ${s.fi}", stackTrace = trace)
+                    val f = Failure(s"unexpected suspension: ${s.fi}", stackTrace = h.fi.trace)
                     GC.fail(FailureException(f))
                 }
 
@@ -47,11 +47,8 @@ package object smock {
             gs.flatMap(fc => inner(self2, fc))
 
           case (-\/(h), \/-(_)) =>
-            h.fi.fold(h.k)(
-              pattern = { (_, _, trace) =>
-                val f = Failure("unexpected program termination", stackTrace = trace)
-                GC.fail(FailureException(f))
-              })
+            val f = Failure("unexpected program termination", stackTrace = h.fi.trace)
+            GC.fail(FailureException(f))
 
           case (\/-(_), -\/(s)) =>
             GC.fail(FailureException(failure(s"unexpected trailing suspension: ${s.fi}")))
