@@ -23,7 +23,6 @@ package object smock {
   type Harness[F[_], G[_], A] = Free[HarnessOp[F, G, ?], A]
 
   final implicit class HarnessSyntax[F[_], G[_], A](val self: Harness[F, G, A]) extends AnyVal {
-    import StandardResults._
 
     private type FreeC[H[_], B] = Free[Coyoneda[H, ?], B]
 
@@ -73,7 +72,7 @@ package object smock {
             GC.fail(FailureException(f))
 
           case (\/-(_), -\/(s)) =>
-            GC.fail(FailureException(failure(s"unexpected trailing suspension: ${s.fi}")))
+            GC.fail(FailureException(Failure(s"unexpected trailing suspension: ${s.fi}")))
 
           case (\/-(_), \/-(b)) =>
             Monad[G].point(b)

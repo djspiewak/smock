@@ -6,9 +6,9 @@ matrix:
     - jdk: oraclejdk8
       scala: 2.11.9
       env: SPECS2_VERSION=3.8.4
-    - jdk: oraclejdk8
-      scala: 2.12.2
-      env: SPECS2_VERSION=3.8.4
+    # - jdk: oraclejdk8
+    #   scala: 2.12.2
+    #   env: SPECS2_VERSION=3.8.4
     - jdk: oraclejdk8
       scala: 2.11.9
       env: SPECS2_VERSION=3.9.1

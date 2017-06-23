@@ -16,7 +16,8 @@
 
 import de.heikoseeberger.sbtheader.license.Apache2_0
 
-addCommandAlias("release", """; reload; set specs2Version := "3.8.4"; ++ "2.11.9"; publishSigned; set specs2Version := "3.8.4"; ++ "2.12.2"; publishSigned; set specs2Version := "3.9.1"; ++ "2.11.9"; publishSigned; set specs2Version := "3.9.1"; ++ "2.12.2"; publishSigned""")
+addCommandAlias("release", """; reload; set specs2Version := "3.8.4"; ++ "2.11.9"; publishSigned; set specs2Version := "3.9.1"; ++ "2.11.9"; publishSigned; set specs2Version := "3.9.1"; ++ "2.12.2"; publishSigned""")
+addCommandAlias("testAll", """; set specs2Version := "3.8.4"; ++ "2.11.9"; test; set specs2Version := "3.9.1"; ++ "2.11.9"; test; set specs2Version := "3.9.1"; ++ "2.12.2"; test""")
 
 organization := "com.codecommit"
 
