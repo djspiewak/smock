@@ -16,13 +16,45 @@
 
 import de.heikoseeberger.sbtheader.license.Apache2_0
 
+addCommandAlias(
+  "release",
+  """
+  ; project root
+  ; reload
+
+  ; set specs2Version := "3.8.4"
+  ; ++"2.11.9"
+  ; publishSigned
+
+  ; set specs2Version := "3.8.4"
+  ; ++"2.12.2"
+  ; publishSigned
+
+  ; set specs2Version := "3.9.1"
+  ; ++"2.11.9"
+  ; publishSigned
+
+  ; set specs2Version := "3.9.1"
+  ; ++"2.12.2"
+  ; publishSigned
+  """)
+
 organization := "com.codecommit"
 
 name := "smock"
 
+lazy val specs2Version = settingKey[String]("specs2 version")
+
+specs2Version := {
+  if (isTravisBuild.value)
+    sys.env("SPECS2_VERSION")
+  else
+    "3.9.1"   // default to the most current version
+}
+
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.13",
-  "org.specs2" %% "specs2-core" % "3.9.1")
+  "org.specs2" %% "specs2-core" % specs2Version.value)
 
 /*
  * Compatibility version.  Use this to declare what version with
