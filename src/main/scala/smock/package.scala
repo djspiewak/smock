@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import scalaz.{~>, -\/, \/-, Catchable, Coyoneda, Forall, Free, Monad}
-import scalaz.syntax.monad._
-
+import cats.{~>, Monad, MonadError}
+import cats.free.{Coyoneda, Free}
+import cats.implicits._
 import org.specs2.execute._
 
 package object smock {
@@ -27,13 +27,13 @@ package object smock {
     private type FreeC[H[_], B] = Free[Coyoneda[H, ?], B]
 
     // an asserted foldMap
-    def apply[B](target: Free[F, B])(implicit GM: Monad[G], GC: Catchable[G]): G[B] = {
+    def apply[B](target: Free[F, B])(implicit G: MonadError[G, Throwable]): G[B] = {
       type Self = FreeC[HarnessOp[F, G, ?], A]
       type Target = FreeC[F, B]
 
       def inner(self: Self, target: Target): G[B] = {
         (self.resume, target.resume) match {
-          case (-\/(h), -\/(s)) =>
+          case (Left(h), Left(s)) =>
             /*
              * Ok, let's unpack the following…
              *
@@ -58,7 +58,7 @@ package object smock {
 
                     case None =>
                       val f = Failure(s"unexpected suspension: ${s.fi}", stackTrace = h.fi.trace)
-                      GC.fail(FailureException(f))
+                      G.raiseError(FailureException(f))
                   }
                 }
               })
@@ -67,23 +67,23 @@ package object smock {
               case (self2, fc) => inner(self2, fc)
             }
 
-          case (-\/(h), \/-(_)) =>
+          case (Left(h), Right(_)) =>
             val f = Failure("unexpected program termination", stackTrace = h.fi.trace)
-            GC.fail(FailureException(f))
+            G.raiseError(FailureException(f))
 
-          case (\/-(_), -\/(s)) =>
-            GC.fail(FailureException(Failure(s"unexpected trailing suspension: ${s.fi}")))
+          case (Right(_), Left(s)) =>
+            G.raiseError(FailureException(Failure(s"unexpected trailing suspension: ${s.fi}")))
 
-          case (\/-(_), \/-(b)) =>
-            Monad[G].point(b)
+          case (Right(_), Right(b)) =>
+            Monad[G].pure(b)
         }
       }
 
       val selfLifted =
-        self.mapSuspension(λ[HarnessOp[F, G, ?] ~> Coyoneda[HarnessOp[F, G, ?], ?]](Coyoneda.lift(_)))
+        self.compile(λ[HarnessOp[F, G, ?] ~> Coyoneda[HarnessOp[F, G, ?], ?]](Coyoneda.lift(_)))
 
       val targetLifted =
-        target.mapSuspension(λ[F ~> Coyoneda[F, ?]](Coyoneda.lift(_)))
+        target.compile(λ[F ~> Coyoneda[F, ?]](Coyoneda.lift(_)))
 
       inner(selfLifted, targetLifted)
     }

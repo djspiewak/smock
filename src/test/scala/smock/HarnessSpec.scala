@@ -16,12 +16,11 @@
 
 package smock
 
+import cats.effect.IO
+import cats.free.Free
+import cats.implicits._
 import org.specs2.execute.FailureException
 import org.specs2.mutable._
-
-import scalaz._
-import scalaz.effect.IO
-import scalaz.syntax.monad._
 
 object HarnessSpec extends Specification {
   type FileSystem[A] = Free[FileSystemOp, A]
@@ -43,7 +42,7 @@ object HarnessSpec extends Specification {
         }
       } yield ()
 
-      harness(read("foo.txt")).unsafePerformIO() mustEqual Array(1, 2, 3, 4, 5)
+      harness(read("foo.txt")).unsafeRunSync() mustEqual Array(1, 2, 3, 4, 5)
     }
 
     "check a multi-suspension program" in {
@@ -68,7 +67,7 @@ object HarnessSpec extends Specification {
         }
       } yield ()
 
-      harness(read("foo.txt") >> write("bar.txt", Array(3, 2, 1))).unsafePerformIO()
+      harness(read("foo.txt") >> write("bar.txt", Array(3, 2, 1))).unsafeRunSync()
 
       ok
     }
@@ -92,7 +91,7 @@ object HarnessSpec extends Specification {
       } yield ()
 
       {
-        harness(read("foo.txt")).unsafePerformIO() mustEqual Array(1, 2, 3, 4, 5)
+        harness(read("foo.txt")).unsafeRunSync() mustEqual Array(1, 2, 3, 4, 5)
       } must throwA[FailureException]
     }
 
@@ -106,7 +105,7 @@ object HarnessSpec extends Specification {
       } yield ()
 
       {
-        harness(read("foo.txt")).unsafePerformIO() mustEqual Array(1, 2, 3, 4, 5)
+        harness(read("foo.txt")).unsafeRunSync() mustEqual Array(1, 2, 3, 4, 5)
       } must throwA[FailureException]
     }
   }

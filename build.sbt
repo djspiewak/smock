@@ -33,8 +33,10 @@ specs2Version := {
 }
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.13",
-  "org.specs2" %% "specs2-core" % specs2Version.value)
+  "org.typelevel" %% "cats-free"   % "0.9.0",
+  "org.typelevel" %% "cats-effect" % "0.3"               % "test",  
+  "org.specs2"    %% "specs2-core" % specs2Version.value
+)
 
 /*
  * Compatibility version.  Use this to declare what version with

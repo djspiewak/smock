@@ -16,8 +16,9 @@
 
 package smock
 
-import scalaz.{Free, Functor}
-import scalaz.syntax.functor._
+import cats.Functor
+import cats.free.Free
+import cats.implicits._
 
 object Harness {
   import HarnessOp._
