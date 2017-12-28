@@ -16,8 +16,18 @@
 
 import de.heikoseeberger.sbtheader.license.Apache2_0
 
-addCommandAlias("release", """; reload; set specs2Version := "3.8.4"; ++ "2.11.9"; publishSigned; set specs2Version := "3.9.1"; ++ "2.11.9"; publishSigned; set specs2Version := "3.9.1"; ++ "2.12.2"; publishSigned""")
-addCommandAlias("testAll", """; set specs2Version := "3.8.4"; ++ "2.11.9"; test; set specs2Version := "3.9.1"; ++ "2.11.9"; test; set specs2Version := "3.9.1"; ++ "2.12.2"; test""")
+val releaseVersions = List(
+  "3.8.4" -> "2.11.9",
+
+  "3.9.1" -> "2.11.9",
+  "3.9.1" -> "2.12.4",
+
+  "4.0.2" -> "2.11.9",
+  "4.0.2" -> "2.12.4"
+)
+
+addCommandAlias("release", releaseCommand)
+addCommandAlias("testAll", testAllCommand)
 
 organization := "com.codecommit"
 
@@ -29,11 +39,14 @@ specs2Version := {
   if (isTravisBuild.value)
     sys.env("SPECS2_VERSION")
   else
-    "3.9.1"   // default to the most current version
+    "4.0.2"   // default to the most current version
 }
 
+val scalazVersion = "7.2.18"
+
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.2.13",
+  "org.scalaz" %% "scalaz-core" % scalazVersion,
+  "org.scalaz" %% "scalaz-effect" % scalazVersion % Test,
   "org.specs2" %% "specs2-core" % specs2Version.value)
 
 /*
@@ -160,4 +173,21 @@ git.formattedShaVersion := {
   git.gitHeadCommit.value map { _.substring(0, 7) } map { sha =>
     git.baseVersion.value + "-" + sha + suffix
   }
+}
+
+
+def releaseCommand: String = {
+  ";reload;" + releaseVersions.map { case (specs2Version, scalaVersion) =>
+    setVersions(specs2Version, scalaVersion) + ";publishSigned"
+  }.mkString(";")
+}
+
+def testAllCommand: String = {
+  releaseVersions.map { case (specs2Version, scalaVersion) =>
+    setVersions(specs2Version, scalaVersion) + ";test"
+  }.mkString(";", ";", "")
+}
+
+def setVersions(specsVersion: String, scalaVersion: String) = {
+  s"""set specs2Version := "$specsVersion"; ++ "$scalaVersion""""
 }
