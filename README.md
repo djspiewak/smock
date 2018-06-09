@@ -7,11 +7,14 @@ A relatively-trivial library for testing `Free` programs, inspired by [purescrip
 ```sbt
 resolvers += "bintray-djspiewak-maven" at "https://dl.bintray.com/djspiewak/maven"
 
-libraryDependencies += "com.codecommit" %% "smock" % "0.3.1-specs2-4.0.2" % "test"
+libraryDependencies += "com.codecommit" %% "smock" % "0.4.0-specs2-4.2.0" % "test"
 ```
 
 Depends on **scalaz 7.2.18**.  Cross-builds are available for Scala 2.12 and 2.11.  Different builds are published for various specs2 versions.  Specifically:
 
+- Specs2 4.2.0
+  + Scala 2.11
+  + Scala 2.12
 - Specs2 4.0.2
   + Scala 2.11
   + Scala 2.12
