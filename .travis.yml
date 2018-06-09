@@ -4,23 +4,29 @@ language: scala
 matrix:
   include:
     - jdk: oraclejdk8
-      scala: 2.11.9
+      scala: 2.11.12
       env: SPECS2_VERSION=3.8.4
     # - jdk: oraclejdk8
     #   scala: 2.12.2
     #   env: SPECS2_VERSION=3.8.4
     - jdk: oraclejdk8
-      scala: 2.11.9
+      scala: 2.11.12
       env: SPECS2_VERSION=3.9.1
     - jdk: oraclejdk8
-      scala: 2.12.4
+      scala: 2.12.6
       env: SPECS2_VERSION=3.9.1
     - jdk: oraclejdk8
-      scala: 2.11.9
+      scala: 2.11.12
       env: SPECS2_VERSION=4.0.2
     - jdk: oraclejdk8
-      scala: 2.12.4
+      scala: 2.12.6
       env: SPECS2_VERSION=4.0.2
+    - jdk: oraclejdk8
+      scala: 2.11.12
+      env: SPECS2_VERSION=4.2.0
+    - jdk: oraclejdk8
+      scala: 2.12.6
+      env: SPECS2_VERSION=4.2.0
 
 before_cache:
   - find $HOME/.sbt -name "*.lock" -type f -delete

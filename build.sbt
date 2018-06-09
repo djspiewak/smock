@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import de.heikoseeberger.sbtheader.license.Apache2_0
-
 val releaseVersions = List(
-  "3.8.4" -> "2.11.9",
+  "3.8.4" -> "2.11.12",
 
-  "3.9.1" -> "2.11.9",
-  "3.9.1" -> "2.12.4",
+  "3.9.1" -> "2.11.12",
+  "3.9.1" -> "2.12.6",
 
-  "4.0.2" -> "2.11.9",
-  "4.0.2" -> "2.12.4"
+  "4.0.2" -> "2.11.12",
+  "4.0.2" -> "2.12.6",
+
+  "4.2.0" -> "2.11.12",
+  "4.2.0" -> "2.12.6"
 )
 
 addCommandAlias("release", releaseCommand)
@@ -39,7 +40,7 @@ specs2Version := {
   if (isTravisBuild.value)
     sys.env("SPECS2_VERSION")
   else
-    "4.0.2"   // default to the most current version
+    "4.2.0"   // default to the most current version
 }
 
 val scalazVersion = "7.2.18"
@@ -98,13 +99,15 @@ coursierUseSbtCredentials := true
 coursierChecksums := Nil      // workaround for nexus sync bugs
 
 credentials in bintray := {
+  val old = (credentials in bintray).value
+
   if (isTravisBuild.value)
     Nil
   else
-    (credentials in bintray).value
+    old
 }
 
-addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary)
+addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.7" cross CrossVersion.binary)
 
 // Adapted from Rob Norris' post at https://tpolecat.github.io/2014/04/11/scalac-flags.html
 scalacOptions ++= Seq(
@@ -131,7 +134,7 @@ scalacOptions ++= {
 
 scalacOptions ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, major)) if major >= 12 || scalaVersion.value == "2.11.9" =>
+    case Some((2, major)) if major >= 12 || scalaVersion.value == "2.11.12" =>
       Seq("-Ypartial-unification")
 
     case _ => Seq.empty
@@ -153,6 +156,7 @@ libraryDependencies ++= {
 }
 
 useGpg := true
+pgpSecretRing := pgpPublicRing.value
 
 enablePlugins(GitVersioning)
 
