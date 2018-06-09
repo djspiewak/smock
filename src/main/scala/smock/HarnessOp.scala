@@ -16,26 +16,18 @@
 
 package smock
 
+import scalaz.{~>, \/}
+
 sealed trait HarnessOp[F[_], G[_], A] extends Product with Serializable {
-
   def trace: StackTrace
-
-  // we need to go through this somewhat sideways encoding
-  // mostly because scalac can't handle gadt type unification
-  def fold[B, R](
-      k: A => B)(
-      pattern: ∀[λ[β => (β => B, PartialNT[F, λ[α => G[(β, α)]]]) => R]]): R
 }
 
 object HarnessOp {
-
   final case class Pattern[F[_], G[_], S](
       pf: PartialNT[F, λ[α => G[(S, α)]]],
-      trace: StackTrace) extends HarnessOp[F, G, S] {
+      trace: StackTrace) extends HarnessOp[F, G, S]
 
-    def fold[B, R](
-        k: S => B)(
-        pattern: ∀[λ[β => (β => B, PartialNT[F, λ[α => G[(β, α)]]]) => R]]): R =
-      pattern[S](k, pf)
-  }
+  final case class WhileDefined[F[_], G[_], S](
+      pf: F ~> λ[α => S \/ G[α]],
+      trace: StackTrace) extends HarnessOp[F, G, S]
 }

@@ -34,36 +34,32 @@ package object smock {
       def inner(self: Self, target: Target): G[B] = {
         (self.resume, target.resume) match {
           case (-\/(h), -\/(s)) =>
-            /*
-             * Ok, let's unpack the following…
-             *
-             * - The intermediate type (the first parameter of the fold) is the
-             *   coyoneda transformation.  Which is to say, given the existential
-             *   produced value, wrap it up and get back into Free for the next
-             *   iteration.
-             * - The return type (the second parameter of the fold) is the
-             *   pair of "next" `self` and `target` wrapped within G.
-             */
-            val stuffG = h.fi.fold(h.k)(
-              pattern = new ∀[λ[β => (β => Self, PartialNT[F, λ[α => G[(β, α)]]]) => G[(Self, Target)]]] {
-                def apply[β] = { (k, pf) =>
-                  // k: β => Self
-                  // pf: PartialNT[F, λ[α => G[(β, α)]]]
+            val step = h.fi match {
+              case HarnessOp.Pattern(pf, trace) =>
+                pf(s.fi) match {
+                  case Some(gsi) => // gsi: G[(β, s.I)]
+                    gsi map {
+                      case (state, result) => (h.k(state), s.k(result))
+                    }
 
-                  pf(s.fi) match {
-                    case Some(gsi) => // gsi: G[(β, s.I)]
-                      gsi map {
-                        case (state, result) => (k(state), s.k(result))
-                      }
-
-                    case None =>
-                      val f = Failure(s"unexpected suspension: ${s.fi}", stackTrace = h.fi.trace)
-                      GC.fail(FailureException(f))
-                  }
+                  case None =>
+                    val f = Failure(s"unexpected suspension: ${s.fi}", stackTrace = trace)
+                    GC.fail(FailureException(f))
                 }
-              })
 
-            stuffG flatMap {
+              case HarnessOp.WhileDefined(pf, _) =>
+                pf(s.fi) match {
+                  case \/-(gsi) => // gsi: G[s.I]
+                    gsi map { r =>
+                      (Free.roll(h), s.k(r))
+                    }
+
+                  case -\/(cont) =>
+                    (h.k(cont), Free.roll(s)).point[G]
+                }
+            }
+
+            step flatMap {
               case (self2, fc) => inner(self2, fc)
             }
 

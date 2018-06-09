@@ -73,6 +73,39 @@ object HarnessSpec extends Specification {
       ok
     }
 
+    "consume operations while defined" in {
+      val H = Harness[FileSystemOp, IO]
+
+      val harness = for {
+        _ <- H.pattern[Array[Byte]] {
+          case Read(name) =>
+            IO {
+              name mustEqual "stuff.txt"
+
+              Array(7, 11, 13)
+            }
+        }
+
+        _ <- H.whileDefined[Unit] {
+          case Yolo(iou) => iou
+        }
+
+        _ <- H.pattern[Unit] {
+          case Write("other.txt", _) => IO(())
+        }
+      } yield ()
+
+      val fsPrg = for {
+        xs <- read("stuff.txt")
+        _ <- yolo(IO(())).replicateM(25)
+        _ <- write("other.txt", xs)
+      } yield ()
+
+      harness(fsPrg).unsafePerformIO()
+
+      ok
+    }
+
     "fail on an early-terminating program" in {
       val H = Harness[FileSystemOp, IO]
 
@@ -123,5 +156,10 @@ object HarnessSpec extends Specification {
 
     def write(name: String, contents: Array[Byte]): FileSystem[Unit] =
       Free.liftF(Write(name, contents))
+
+    final case class Yolo(iou: IO[Unit]) extends FileSystemOp[Unit]
+
+    def yolo(iou: IO[Unit]): FileSystem[Unit] =
+      Free.liftF(Yolo(iou))
   }
 }

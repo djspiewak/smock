@@ -16,8 +16,9 @@
 
 package smock
 
-import scalaz.{Free, Functor}
+import scalaz.{~>, \/, Free, Functor}
 import scalaz.syntax.functor._
+import scalaz.syntax.std.option._
 
 object Harness {
   import HarnessOp._
@@ -41,6 +42,14 @@ object Harness {
     Free.liftF(Pattern(PartialNT.broaden[F, λ[α => G[(S, α)]], A](pf), trace))
   }
 
+  /** Consumes steps of the program while the given partial function is defined. */
+  def whileDefined[F[_], G[_], A](pf: PartialFunction[F[A], G[A]]): Harness[F, G, Unit] = {
+    val e = new Exception
+    val trace = e.getStackTrace.toList.drop(1)
+
+    mkWhileDefined(pf, trace)
+  }
+
   final class PartialHarness[F[_], G[_]] private[Harness] () {
 
     // copy/pasted to allow for proper stack computation
@@ -59,5 +68,25 @@ object Harness {
 
       Free.liftF(Pattern(PartialNT.broaden[F, λ[α => G[(S, α)]], A](pf), trace))
     }
+
+    /** Consumes steps of the program while the given partial function is defined. */
+    def whileDefined[A](pf: PartialFunction[F[A], G[A]]): Harness[F, G, Unit] = {
+      val e = new Exception
+      val trace = e.getStackTrace.toList.drop(1)
+
+      mkWhileDefined(pf, trace)
+    }
+  }
+
+  private def mkWhileDefined[F[_], G[_], A](pf: PartialFunction[F[A], G[A]], trace: StackTrace): Harness[F, G, Unit] = {
+    val f: F ~> λ[α => Unit \/ G[α]] =
+      new (F ~> λ[α => Unit \/ G[α]]) {
+        def apply[α](fa: F[α]): Unit \/ G[α] =
+          pf.asInstanceOf[PartialFunction[F[α], G[α]]]
+            .lift(fa)
+            .toRightDisjunction(())
+      }
+
+    Free.liftF(WhileDefined(f, trace))
   }
 }
