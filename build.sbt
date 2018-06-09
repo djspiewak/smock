@@ -80,13 +80,11 @@ libraryDependencies ++= Seq(
  * version bump of 1.0.  Again, this is all to avoid pre-committing
  * to a major/minor bump before the work is done (see: Scala 2.8).
  */
-val BaseVersion = "0.3"
+val BaseVersion = "0.4"
 
-licenses += ("Apache-2.0", url("http://www.apache.org/licenses/"))
-
-headers := Map(
-  "scala" -> Apache2_0("2017", "Daniel Spiewak"),
-  "java" -> Apache2_0("2017", "Daniel Spiewak"))
+organizationName in ThisBuild := "Daniel Spiewak"
+startYear in ThisBuild := Some(2018)
+licenses in ThisBuild += ("Apache-2.0", url("http://www.apache.org/licenses/"))
 
 bintrayVcsUrl := Some("https://github.com/djspiewak/smock")
 
