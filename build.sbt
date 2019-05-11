@@ -158,9 +158,6 @@ libraryDependencies ++= {
   }
 }
 
-useGpg := true
-pgpSecretRing := pgpPublicRing.value
-
 enablePlugins(GitVersioning)
 
 val ReleaseTag = """^v([\d\.]+)$""".r
@@ -183,7 +180,7 @@ git.formattedShaVersion := {
 
 def releaseCommand: String = {
   ";reload;" + releaseVersions.map { case (specs2Version, scalaVersion) =>
-    setVersions(specs2Version, scalaVersion) + ";publishSigned"
+    setVersions(specs2Version, scalaVersion) + ";publish"
   }.mkString(";")
 }
 
