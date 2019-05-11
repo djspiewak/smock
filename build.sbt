@@ -18,13 +18,16 @@ val releaseVersions = List(
   "3.8.4" -> "2.11.12",
 
   "3.9.1" -> "2.11.12",
-  "3.9.1" -> "2.12.6",
+  "3.9.1" -> "2.12.8",
 
   "4.0.2" -> "2.11.12",
-  "4.0.2" -> "2.12.6",
+  "4.0.2" -> "2.12.8",
 
   "4.2.0" -> "2.11.12",
-  "4.2.0" -> "2.12.6"
+  "4.2.0" -> "2.12.8",
+
+  "4.3.6" -> "2.11.12",
+  "4.3.6" -> "2.12.8"
 )
 
 addCommandAlias("release", releaseCommand)
@@ -40,10 +43,10 @@ specs2Version := {
   if (isTravisBuild.value)
     sys.env("SPECS2_VERSION")
   else
-    "4.2.0"   // default to the most current version
+    "4.3.6"   // default to the most current version
 }
 
-val scalazVersion = "7.2.18"
+val scalazVersion = "7.2.27"
 
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % scalazVersion,
