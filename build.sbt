@@ -86,11 +86,23 @@ libraryDependencies ++= Seq(
  */
 val BaseVersion = "0.4"
 
-organizationName in ThisBuild := "Daniel Spiewak"
-startYear in ThisBuild := Some(2018)
-licenses in ThisBuild += ("Apache-2.0", url("http://www.apache.org/licenses/"))
+ThisBuild / organizationName := "Daniel Spiewak"
+ThisBuild / startYear := Some(2018)
+ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/"))
 
-bintrayVcsUrl := Some("https://github.com/djspiewak/smock")
+ThisBuild / developers := List(
+  Developer("djspiewak", "Daniel Spiewak", "djspiewak@gmail.com", url("https://github.com/djspiewak")))
+
+ThisBuild / versionScheme := Some("pvp")
+
+homepage := Some(url("https://github.com/djspiewak/smock"))
+
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/djspiewak/smock"),
+    "scm:git@github.com:djspiewak/smock.git"))
+
+publishTo := sonatypePublishToBundle.value
 
 /***********************************************************************\
                       Boilerplate below these lines
@@ -100,15 +112,6 @@ enablePlugins(AutomateHeaderPlugin)
 
 coursierUseSbtCredentials := true
 coursierChecksums := Nil      // workaround for nexus sync bugs
-
-credentials in bintray := {
-  val old = (credentials in bintray).value
-
-  if (isTravisBuild.value)
-    Nil
-  else
-    old
-}
 
 addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.7" cross CrossVersion.binary)
 
@@ -144,11 +147,11 @@ scalacOptions ++= {
   }
 }
 
-scalacOptions in Test += "-Yrangepos"
+Test / scalacOptions += "-Yrangepos"
 
-scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains))
+Compile / console / scalacOptions ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains))
 
-scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value
+Test / console / scalacOptions := (Compile / console / scalacOptions).value
 
 libraryDependencies ++= {
   scalaVersion.value match {
@@ -181,7 +184,7 @@ git.formattedShaVersion := {
 def releaseCommand: String = {
   ";reload;" + releaseVersions.map { case (specs2Version, scalaVersion) =>
     setVersions(specs2Version, scalaVersion) + ";publish"
-  }.mkString(";")
+  }.mkString(";") + ";sonatypeBundleRelease"
 }
 
 def testAllCommand: String = {
